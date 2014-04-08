@@ -16,7 +16,7 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(array $options = array())
     {
         // Sure that session is initialized for saving somethings.
         if (!session_id()) {
@@ -27,6 +27,8 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
             session_start();
             session_set_cookie_params($this->options['cookie_expires'], '/'); // maximum lifetime
         }
+
+        parent::__construct($options);
     }
 
     /**
