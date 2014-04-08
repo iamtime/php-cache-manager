@@ -8,7 +8,7 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
      * @var array
      */
     protected $options = array(
-        'cookie_expires' => 1800, // seconds
+        'cookie_expires' => 21600, // seconds - 6 hours
     );
 
     /**
