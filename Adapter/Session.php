@@ -13,7 +13,7 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
 
     /**
      * Create ChipVN_Cache_Adapter_Session instance.
-     * 
+     *
      * @return void
      */
     public function __construct()
@@ -46,7 +46,6 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
         $session[$key] = array(
             'value'    => $value,
             'expires'  => time() + $expires,
-            'lifetime' => $expires,
         );
     }
 

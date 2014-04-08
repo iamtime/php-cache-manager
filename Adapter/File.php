@@ -2,7 +2,6 @@
 
 class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_Cache_Adapter_Interface
 {
-
     const FILE_EXTENSION = '.cache';
 
     /**
@@ -27,6 +26,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_C
         if (!is_writable($cache_dir)) {
             throw new Exception(sprintf('Cache directory "%s" must be writeable.', $cache_dir));
         }
+        $options['cache_dir'] = $cache_dir;
 
         return parent::setOptions($options);
     }
@@ -52,12 +52,8 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_C
         $key       = $this->sanitize($key);
         $expires   = $expires ? $expires : $this->options['expires'];
         $directory = $this->getDirectory(true);
+        $data      = ($expires + time()) . "\r\n" . serialize($value);
 
-        $data = serialize(array(
-            'expires'  => $expires + time(),
-            'lifetime' => $expires,
-            'value'    => $value
-        ));
         file_put_contents($directory . $key, $data);
     }
 
@@ -74,10 +70,17 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_C
         $directory = $this->getDirectory(true);
 
         if (file_exists($file = $directory . $key)) {
-            $data = unserialize(file_get_contents($file));
-            if ($data['expires'] >= time()) {
-                return $data['value'];
+            $fp = fopen($file, 'r');
+            $lifetime = (int) fgets($fp);
+            if ($lifetime >= time()) {
+                $data = '';
+                while (($buffer = fgets($fp, 4096)) !== false) {
+                    $data .= $buffer;
+                }
+                fclose($fp);
+                return unserialize($data);
             }
+            fclose($fp);
             unlink($file);
         }
 
@@ -196,8 +199,11 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_C
                     rmdir($file);
                 }
             } elseif (is_file($file)) {
-                $data = unserialize(file_get_contents($file));
-                if ($data['expires'] < time()) {
+                $fp = fopen($file, 'r');
+                $lifetime = (int) fgets($fp);
+                fclose($fp);
+
+                if ($lifetime < time()) {
                     unlink($file);
                 }
             }
