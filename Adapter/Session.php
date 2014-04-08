@@ -37,7 +37,7 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
      * @param  strign       $key
      * @param  mixed        $value
      * @param  null|integer $expires In seconds
-     * @return void
+     * @return boolean
      */
     public function set($key, $value, $expires = null)
     {
@@ -49,6 +49,7 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
             'value'    => $value,
             'expires'  => time() + $expires,
         );
+        return true;
     }
 
     /**

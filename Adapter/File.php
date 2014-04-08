@@ -36,7 +36,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_C
      */
     protected function sanitize($id)
     {
-        return parent::sanitize($id) . self::FILE_EXTENSION;
+        return parent::sanitize(md5($id)) . self::FILE_EXTENSION;
     }
 
     /**
@@ -45,7 +45,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_C
      * @param  strign       $key
      * @param  mixed        $value
      * @param  null|integer $expires In seconds
-     * @return void
+     * @return boolean
      */
     public function set($key, $value, $expires = null)
     {
@@ -54,7 +54,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_C
         $directory = $this->getDirectory(true);
         $data      = ($expires + time()) . "\r\n" . serialize($value);
 
-        file_put_contents($directory . $key, $data);
+        return file_put_contents($directory . $key, $data);
     }
 
     /**

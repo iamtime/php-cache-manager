@@ -46,7 +46,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
      * @param  strign       $key
      * @param  mixed        $value
      * @param  null|integer $expires In seconds
-     * @return void
+     * @return boolean
      */
     public function set($key, $value, $expires = null)
     {
@@ -59,7 +59,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
             $key = $index . $key;
         }
 
-        $this->memcached->set($key, $value, $expires);
+        return $this->memcached->set($key, $value, $expires);
     }
 
     /**
@@ -78,8 +78,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
 
             $key = $index . $key;
         }
-
-        $data = $this->memcached->get($key, $value, $expires);
+        $data = $this->memcached->get($key);
 
         if ($data == false && !in_array($key, $this->memcached->getAllKeys())) {
             return $default;

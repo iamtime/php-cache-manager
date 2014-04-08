@@ -21,7 +21,7 @@ abstract class ChipVN_Cache_Storage
     /**
      * Create a storage instance.
      *
-     * @param array $options 
+     * @param array $options
      */
     public function __construct(array $options = array())
     {
@@ -38,8 +38,8 @@ abstract class ChipVN_Cache_Storage
     /**
      * Sanitize cache key.
      *
-     * @param  string $id 
-     * @return string     
+     * @param  string $id
+     * @return string
      */
     protected function sanitize($id)
     {

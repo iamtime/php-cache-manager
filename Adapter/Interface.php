@@ -8,7 +8,7 @@ interface ChipVN_Cache_Adapter_Interface
      * @param  strign       $key
      * @param  mixed        $value
      * @param  null|integer $expires In seconds
-     * @return void
+     * @return boolean
      */
     public function set($key, $value, $expires = null);
 
@@ -32,8 +32,8 @@ interface ChipVN_Cache_Adapter_Interface
     /**
      * Delete a group cache.
      *
-     * @param  string $name 
-     * @return boolean       
+     * @param  string $name
+     * @return boolean
      */
     public function deleteGroup($name);
 
@@ -45,7 +45,7 @@ interface ChipVN_Cache_Adapter_Interface
     public function flush();
 
     /**
-     * Run garbage collect. 
+     * Run garbage collect.
      *
      * @return void
      */
@@ -69,8 +69,8 @@ interface ChipVN_Cache_Adapter_Interface
     /**
      * Get group index by name.
      *
-     * @param  string $name 
-     * @return string       
+     * @param  string $name
+     * @return string
      */
     public function getGroupIndex($name);
 }
