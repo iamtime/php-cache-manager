@@ -41,14 +41,14 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
      */
     public function set($key, $value, $expires = null)
     {
-        $key     = $this->sanitize($key);
+        $key     = $this->getKeyGrouped($key);
         $expires = $expires ? $expires : $this->options['expires'];
-        $session =& $this->getSession();
 
-        $session[$key] = array(
+        $_SESSION[$key] = array(
             'value'    => $value,
             'expires'  => time() + $expires,
         );
+
         return true;
     }
 
@@ -61,16 +61,15 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
      */
     public function get($key, $default = null)
     {
-        $key     = $this->sanitize($key);
-        $session =& $this->getSession();
+        $key = $this->getKeyGrouped($key);
 
-        if (isset($session[$key])) {
-            $data = $session[$key];
+        if (isset($_SESSION[$key])) {
+            $data = $_SESSION[$key];
             if ($data['expires'] >= time()) {
                 return $data['value'];
             }
         }
-        unset($session[$key]);
+        unset($_SESSION[$key]);
 
         return $default;
     }
@@ -83,10 +82,8 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
      */
     public function delete($key)
     {
-        $key     = $this->sanitize($key);
-        $session =& $this->getSession();
-
-        unset($session[$key]);
+        $key = $this->getKeyGrouped($key);
+        unset($_SESSION[$key]);
 
         return true;
     }
@@ -99,7 +96,13 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
      */
     public function deleteGroup($name)
     {
-        unset($_SESSION[$this->getGroupIndex($name)]);
+        $group = $this->getGroupIndex($name);
+
+        foreach (array_keys($_SESSION) as $key) {
+            if (strpos($key, $group) === 0) {
+                unset($_SESSION[$key]);
+            }
+        }
 
         return true;
     }
@@ -111,29 +114,9 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
      */
     public function flush()
     {
-        unset($_SESSION);
+        $_SESSION = array();
 
         return true;
-    }
-
-    /**
-     * Get session for cache
-     *
-     * @return array
-     */
-    protected function &getSession()
-    {
-        $session =& $_SESSION;
-
-        if ($group = $this->options['group']) {
-            $index = $this->getGroupIndex($group);
-            if (!isset($_SESSION[$index])) {
-                $_SESSION[$index] = array();
-            }
-            $session =& $_SESSION[$index];
-        }
-
-        return $session;
     }
 
     /**
@@ -144,6 +127,9 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
     public function garbageCollect()
     {
         $this->runGarbageCollect($_SESSION);
+        if (empty($_SESSION)) {
+            $_SESSION = array();
+        }
     }
 
     /**
@@ -165,5 +151,24 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
                 }
             }
         }
+    }
+
+    /**
+     * Get cache key.
+     *
+     * @param  string $key
+     * @return string
+     */
+    protected function getKeyGrouped($key)
+    {
+        $key = $this->sanitize($key);
+
+        if ($group = $this->options['group']) {
+            $index = $this->getGroupIndex($group);
+
+            $key = $index . $key;
+        }
+
+        return $key;
     }
 }

@@ -50,14 +50,8 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
      */
     public function set($key, $value, $expires = null)
     {
-        $key     = $this->sanitize($key);
+        $key     = $this->getKeyGrouped($key);
         $expires = $expires ? $expires : $this->options['expires'];
-
-        if ($group = $this->options['group']) {
-            $index = $this->getGroupIndex($group);
-
-            $key = $index . $key;
-        }
 
         return $this->memcached->set($key, $value, $expires);
     }
@@ -71,13 +65,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
      */
     public function get($key, $default = null)
     {
-        $key = $this->sanitize($key);
-
-        if ($group = $this->options['group']) {
-            $index = $this->getGroupIndex($group);
-
-            $key = $index . $key;
-        }
+        $key  = $this->getKeyGrouped($key);
         $data = $this->memcached->get($key);
 
         if ($data == false && !in_array($key, $this->memcached->getAllKeys())) {
@@ -95,6 +83,8 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
      */
     public function delete($key)
     {
+        $key = $this->getKeyGrouped($key);
+
         $this->memcached->delete($key);
     }
 
@@ -110,7 +100,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
 
         foreach ($this->memcached->getAllKeys() as $key) {
             if (strpos($key, $group) === 0) {
-                $this->delete($key);
+                $this->memcached->delete($key);
             }
         }
 
@@ -134,5 +124,24 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
      */
     public function garbageCollect()
     {
+    }
+
+    /**
+     * Get cache key.
+     *
+     * @param  string $key
+     * @return string
+     */
+    protected function getKeyGrouped($key)
+    {
+        $key = $this->sanitize($key);
+
+        if ($group = $this->options['group']) {
+            $index = $this->getGroupIndex($group);
+
+            $key = $index . $key;
+        }
+
+        return $key;
     }
 }
