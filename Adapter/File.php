@@ -116,7 +116,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_C
     public function deleteGroup($name)
     {
         $directory = $this->options['cache_dir'];
-        $index     = $this->getGroupIndex($group);
+        $index     = $this->getGroupIndex($name);
 
         if (is_dir($directory . $index)) {
             $this->deleteDirectory($directory . $index);
