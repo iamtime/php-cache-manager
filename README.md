@@ -10,8 +10,10 @@
 * All basic features (set/ get/ delete/ garbage collect)
 * Save/ delete cache by simple group (1 level)
 
+### Requirements
+* PHP >= 5
+
 ### Supports
-- PHP >= 5.0
 - File
 - Session
 - Memcached
