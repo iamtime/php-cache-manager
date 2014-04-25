@@ -58,6 +58,17 @@ abstract class ChipVN_Cache_Storage
     }
 
     /**
+     * Set cache option by name, value.
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    public function setOption($name, $value)
+    {
+        $this->options[$name] = $value;
+    }
+
+    /**
      * Get cache options.
      *
      * @return array
