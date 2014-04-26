@@ -145,7 +145,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Storage implements ChipVN_C
      */
     protected function deleteDirectory($directory, $removeSelf = false)
     {
-        foreach (glob($dir . '/*') as $file) {
+        foreach (glob($directory . '/*') as $file) {
             is_dir($file) ? $this->deleteDirectory($file, true) : unlink($file);
         }
         if ($removeSelf) {
