@@ -1,6 +1,6 @@
 <?php
 
-class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements ChipVN_Cache_Adapter_Interface
+class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
 {
     /**
      * Cache options.
@@ -25,9 +25,6 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
     public function __construct(array $options = array())
     {
         parent::__construct($options);
-
-        $this->memcached = new Memcached;
-        $this->memcached->addServer($this->options['host'], $this->options['port']);
     }
 
     /**
@@ -37,6 +34,11 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
      */
     public function getMemcached()
     {
+        if (!isset($this->memcached)) {
+            $this->memcached = new Memcached;
+            $this->memcached->addServer($this->options['host'], $this->options['port']);
+        }
+
         return $this->memcached;
     }
 
@@ -53,7 +55,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
         $key     = $this->getKeyGrouped($key);
         $expires = $expires ? $expires : $this->options['expires'];
 
-        return $this->memcached->set($key, $value, $expires);
+        return $this->getMemcached()->set($key, $value, $expires);
     }
 
     /**
@@ -66,9 +68,9 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
     public function get($key, $default = null)
     {
         $key  = $this->getKeyGrouped($key);
-        $data = $this->memcached->get($key);
+        $data = $this->getMemcached()->get($key);
 
-        if ($data == false && !in_array($key, $this->memcached->getAllKeys())) {
+        if ($data == false && !in_array($key, $this->getMemcached()->getAllKeys())) {
             return $default;
         }
 
@@ -85,22 +87,51 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
     {
         $key = $this->getKeyGrouped($key);
 
-        $this->memcached->delete($key);
+        $this->getMemcached()->delete($key);
     }
 
     /**
      * Delete a group cache.
      *
-     * @param  string  $name
+     * @param  null|string $name Null to delete entries in current group
      * @return boolean
      */
-    public function deleteGroup($name)
+    public function deleteGroup($name = null)
     {
-        $group = $this->getGroupIndex($name);
+        $group  = ($name === null ? $this->options['group'] : $name);
+        $find   = ($group ? $this->getGroupIndex($group) . ':::' : '');
+        $len    = strlen($find);
 
-        foreach ($this->memcached->getAllKeys() as $key) {
-            if (strpos($key, $group) === 0) {
-                $this->memcached->delete($key);
+        foreach ($this->getMemcached()->getAllKeys() as $key) {
+            if (substr($key, 0, $len) == $find
+                && ($len == 0 && !strpos($key, ':::') || $len > 0 && strpos($key, ':::'))
+            ) {
+                $this->getMemcached()->delete($key);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Delete all cache entries with a prefix.
+     * If $prefix is "null", the method will delete all entries use options[prefix].
+     * If $group is not specified, options[group] will be used to execution.
+     *
+     * @param  string      $prefix
+     * @param  null|string $group
+     * @return boolean
+     */
+    public function deletePrefix($prefix = null, $group = null)
+    {
+        $prefix = ($prefix === null ? $this->options['prefix'] : $prefix);
+        $group  = ($group === null ? $this->options['group'] : $group);
+        $find   = ($group ? $this->getGroupIndex($group) . ':::' : '') . $prefix;
+        $len    = strlen($find);
+
+        foreach ($this->getMemcached()->getAllKeys() as $key) {
+            if (substr($key, 0, $len) == $find) {
+                $this->getMemcached()->delete($key);
             }
         }
 
@@ -114,7 +145,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
      */
     public function flush()
     {
-        $this->memcached->flush();
+        $this->getMemcached()->flush();
     }
 
     /**
@@ -139,7 +170,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Storage implements Chi
         if ($group = $this->options['group']) {
             $index = $this->getGroupIndex($group);
 
-            $key = $index . $key;
+            $key = $index . ':::' . $key;
         }
 
         return $key;

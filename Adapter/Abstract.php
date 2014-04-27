@@ -1,6 +1,6 @@
 <?php
 
-abstract class ChipVN_Cache_Storage
+abstract class ChipVN_Cache_Adapter_Abstract
 {
     /**
      * Default value expires
@@ -61,7 +61,7 @@ abstract class ChipVN_Cache_Storage
      * Set cache option by name, value.
      *
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function setOption($name, $value)
     {
@@ -88,4 +88,64 @@ abstract class ChipVN_Cache_Storage
     {
         return '__GROUP_' . $name;
     }
+
+    /**
+     * Set a cache entry.
+     *
+     * @param  strign       $key
+     * @param  mixed        $value
+     * @param  null|integer $expires In seconds
+     * @return boolean
+     */
+    abstract public function set($key, $value, $expires = null);
+
+    /**
+     * Get a cache entry.
+     *
+     * @param  string $key
+     * @param  mixed  $default
+     * @return mixed
+     */
+    abstract public function get($key, $default = null);
+
+    /**
+     * Delete a cache entry.
+     *
+     * @param  string  $name
+     * @return boolean
+     */
+    abstract public function delete($key);
+
+    /**
+     * Delete a group cache.
+     *
+     * @param  null|string $name Null to delete entries in current group
+     * @return boolean
+     */
+    abstract public function deleteGroup($name = null);
+
+    /**
+     * Delete all cache entries with a prefix.
+     * If $prefix is "null", the method will delete all entries use options[prefix].
+     * If $group is not specified, options[group] will be used to execution.
+     *
+     * @param  string      $prefix
+     * @param  null|string $group
+     * @return boolean
+     */
+    abstract public function deletePrefix($prefix = null, $group = null);
+
+    /**
+     * Delete all cache entries.
+     *
+     * @return boolean
+     */
+    abstract public function flush();
+
+    /**
+     * Run garbage collect.
+     *
+     * @return void
+     */
+    abstract public function garbageCollect();
 }

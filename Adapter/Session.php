@@ -1,6 +1,6 @@
 <?php
 
-class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipVN_Cache_Adapter_Interface
+class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Adapter_Abstract
 {
     /**
      * Cache options.
@@ -8,7 +8,6 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
      * @var array
      */
     protected $options = array(
-        'cookie_expires' => 21600, // seconds - 6 hours
     );
 
     /**
@@ -23,11 +22,8 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
             if (headers_sent()) {
                 throw new Exception('Session is not initialized. Please sure that session_start(); was called at the top of the script.');
             }
-            session_name(md5(__CLASS__));
             session_start();
-            session_set_cookie_params($this->options['cookie_expires'], '/'); // maximum lifetime
         }
-
         parent::__construct($options);
     }
 
@@ -91,15 +87,44 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
     /**
      * Delete a group cache.
      *
-     * @param  string  $key
+     * @param  null|string $name Null to delete entries in current group
      * @return boolean
      */
-    public function deleteGroup($name)
+    public function deleteGroup($name = null)
     {
-        $group = $this->getGroupIndex($name);
+        $group  = ($name === null ? $this->options['group'] : $name);
+        $find   = ($group ? $this->getGroupIndex($group) . ':::' : '');
+        $len    = strlen($find);
 
         foreach (array_keys($_SESSION) as $key) {
-            if (strpos($key, $group) === 0) {
+            if (substr($key, 0, $len) == $find
+                && ($len == 0 && !strpos($key, ':::') || $len > 0 && strpos($key, ':::'))
+            ) {
+                unset($_SESSION[$key]);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Delete all cache entries with a prefix.
+     * If $prefix is "null", the method will delete all entries use options[prefix].
+     * If $group is not specified, options[group] will be used to execution.
+     *
+     * @param  string      $prefix
+     * @param  null|string $group
+     * @return boolean
+     */
+    public function deletePrefix($prefix = null, $group = null)
+    {
+        $prefix = ($prefix === null ? $this->options['prefix'] : $prefix);
+        $group  = ($group === null ? $this->options['group'] : $group);
+        $find   = ($group ? $this->getGroupIndex($group) . ':::' : '') . $prefix;
+        $len    = strlen($find);
+
+        foreach (array_keys($_SESSION) as $key) {
+            if (substr($key, 0, $len) == $find) {
                 unset($_SESSION[$key]);
             }
         }
@@ -166,7 +191,7 @@ class ChipVN_Cache_Adapter_Session extends ChipVN_Cache_Storage implements ChipV
         if ($group = $this->options['group']) {
             $index = $this->getGroupIndex($group);
 
-            $key = $index . $key;
+            $key = $index . ':::' . $key;
         }
 
         return $key;
