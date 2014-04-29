@@ -240,12 +240,11 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
      */
     protected function runGarbageCollect($directory)
     {
-        $files = glob($directory . '*', GLOB_MARK);
-        foreach ($files as $file) {
+        foreach ((array) glob($directory . '*', GLOB_MARK) as $file) {
             if (is_dir($file)) {
                 $this->runGarbageCollect($file);
-                if (!count(glob($file . '*' . self::FILE_EXTENSION))) {
-                    @rmdir($file);
+                if (!glob($file . '*')) {
+                    rmdir($file);
                 }
             } elseif (is_file($file) && substr($file, -strlen(self::FILE_EXTENSION)) == self::FILE_EXTENSION) {
                 $fp = fopen($file, 'r');
@@ -253,7 +252,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
                 fclose($fp);
 
                 if ($lifetime < time()) {
-                    @unlink($file);
+                    unlink($file);
                 }
             }
         }
