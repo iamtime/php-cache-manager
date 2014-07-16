@@ -164,7 +164,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
      */
     protected function deleteDirectory($directory, $selfDelete = false, $pattern = '*')
     {
-        foreach (glob($directory . DIRECTORY_SEPARATOR . $pattern) as $file) {
+        foreach ((array) glob($directory . DIRECTORY_SEPARATOR . $pattern) as $file) {
             if (is_dir($file)) {
                 $this->deleteDirectory($file, true);
             } else {
