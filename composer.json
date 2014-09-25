@@ -12,7 +12,8 @@
         }
     ],
     "require": {
-        "php": ">=5.0"
+        "php": ">=5.0",
+        "ptcong/php-chipvn-classloader": "dev-master"
     },
 	"autoload": {
 		"psr-0": {
