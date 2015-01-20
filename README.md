@@ -1,8 +1,9 @@
 # PHP Cache Library
-- A php library used to manage cache
-- Support PHP >= 5
-- Support more adapters: File, Array, Session, Memcached, Memcache
+* A php library used to manage cache
+* Support PHP >= 5
+* Support more adapters: File, Array, Session, Memcached, Memcache
 ----
+
 * Author: Phan Thanh Cong <ptcong90@gmail.com>
 * License: MIT
 
