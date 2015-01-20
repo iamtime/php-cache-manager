@@ -58,7 +58,7 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
         $expires = $expires ? $expires : $this->options['expires'];
 
         if (is_bool($value)) {
-            $this->getCache()->set($key.'#REAL', (int) $value, 0, $expires);
+            $this->getCache()->set($this->sanitize($key).'#REAL', (int) $value, 0, $expires);
         }
 
         return $this->getCache()->set($key, $value, 0, $expires);
@@ -77,7 +77,7 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
             $value = $this->getCache()->get($key);
 
             if (($value === '' || $value === '1')
-                && false !== $realValue = $this->getCache()->get($key.'#REAL')
+                && false !== $realValue = $this->getCache()->get($this->sanitize($key).'#REAL')
             ) {
                 return (bool) $realValue;
             }
