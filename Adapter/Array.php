@@ -45,7 +45,7 @@ class ChipVN_Cache_Adapter_Array extends ChipVN_Cache_Adapter_Abstract
     {
         $key = $this->sanitize($id);
 
-        return isset($this->data[$key]) && $this->data[$key][1] > time()
+        return isset($this->data[$key]) && $this->data[$key][0] > time()
             ? true
             : $this->delete($id) && false;
     }
