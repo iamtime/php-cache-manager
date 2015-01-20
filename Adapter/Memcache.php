@@ -42,6 +42,8 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
      */
     public function has($key)
     {
+        $key = $this->sanitize($key);
+
         return $this->getCache()->get($key) !== false;
     }
 
@@ -55,10 +57,11 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
      */
     public function set($key, $value, $expires = null)
     {
+        $key     = $this->sanitize($key);
         $expires = $expires ? $expires : $this->options['expires'];
 
         if (is_bool($value)) {
-            $this->getCache()->set($this->sanitize($key).'#REAL', (int) $value, 0, $expires);
+            $this->getCache()->set($key.'#REAL', (int) $value, 0, $expires);
         }
 
         return $this->getCache()->set($key, $value, 0, $expires);
@@ -74,10 +77,11 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
     public function get($key, $default = null)
     {
         if ($this->has($key)) {
+            $key   = $this->sanitize($key);
             $value = $this->getCache()->get($key);
 
             if (($value === '' || $value === '1')
-                && false !== $realValue = $this->getCache()->get($this->sanitize($key).'#REAL')
+                && false !== $realValue = $this->getCache()->get($key.'#REAL')
             ) {
                 return (bool) $realValue;
             }
@@ -96,6 +100,8 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
      */
     public function delete($key)
     {
+        $key = $this->sanitize($key);
+
         return $this->getCache()->delete($key);
     }
 

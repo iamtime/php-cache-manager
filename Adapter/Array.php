@@ -59,7 +59,7 @@ class ChipVN_Cache_Adapter_Array extends ChipVN_Cache_Adapter_Abstract
      */
     public function get($key, $default = null)
     {
-        return $this->has($key) ? $this->data[$key] : $default;
+        return $this->has($key) ? $this->data[$this->sanitize($key)] : $default;
     }
 
     /**

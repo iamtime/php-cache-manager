@@ -42,6 +42,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
      */
     public function has($key)
     {
+        $key = $this->sanitize($key);
         $this->getCache()->get($key);
 
         return $this->getCache()->getResultCode() !== Memcached::RES_NOTFOUND;
@@ -57,6 +58,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
      */
     public function set($key, $value, $expires = null)
     {
+        $key     = $this->sanitize($key);
         $expires = $expires ? $expires : $this->options['expires'];
 
         return $this->getCache()->set($key, $value, $expires);
@@ -71,7 +73,9 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
      */
     public function get($key, $default = null)
     {
-        return $this->has($key) ? $this->getCache()->get($key) : $default;
+        return $this->has($key)
+            ? $this->getCache()->get($this->sanitize($key))
+            : $default;
     }
 
     /**
@@ -82,6 +86,8 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
      */
     public function delete($key)
     {
+        $key = $this->sanitize($key);
+
         return $this->getCache()->delete($key);
     }
 
