@@ -13,7 +13,6 @@ abstract class ChipVN_Cache_Adapter_Abstract
      * @var array
      */
     protected $defaultOptions = array(
-        'group'   => '',
         'prefix'  => '',
         'expires' => self::DEFAULT_EXPIRES,
     );
@@ -38,12 +37,12 @@ abstract class ChipVN_Cache_Adapter_Abstract
     /**
      * Sanitize cache key.
      *
-     * @param  string $id
+     * @param  string $key
      * @return string
      */
-    protected function sanitize($id)
+    protected function sanitize($key)
     {
-        return $this->options['prefix'] . str_replace(array('/', '\\', ' '), '_', $id);
+        return $this->options['prefix'].md5($key);
     }
 
     /**
@@ -79,15 +78,25 @@ abstract class ChipVN_Cache_Adapter_Abstract
     }
 
     /**
-     * Get group index by name.
+     * Put a cache entry.
      *
-     * @param  string $name
-     * @return string
+     * @param  string       $key
+     * @param  string       $value
+     * @param  null|integer $expires In seconds
+     * @return boolean
      */
-    public function getGroupIndex($name)
+    public function put($key, $value, $expires = null)
     {
-        return '__GROUP_' . $name;
+        return $this->set($key, $value, $expires);
     }
+
+    /**
+     * Determine if the key is exist or not.
+     *
+     * @param  string  $key
+     * @return boolean
+     */
+    abstract public function has($key);
 
     /**
      * Set a cache entry.
@@ -115,25 +124,6 @@ abstract class ChipVN_Cache_Adapter_Abstract
      * @return boolean
      */
     abstract public function delete($key);
-
-    /**
-     * Delete a group cache.
-     *
-     * @param  null|string $name Null to delete entries in current group
-     * @return boolean
-     */
-    abstract public function deleteGroup($name = null);
-
-    /**
-     * Delete all cache entries with a prefix.
-     * If $prefix is "null", the method will delete all entries use options[prefix].
-     * If $group is not specified, options[group] will be used to execution.
-     *
-     * @param  string      $prefix
-     * @param  null|string $group
-     * @return boolean
-     */
-    abstract public function deletePrefix($prefix = null, $group = null);
 
     /**
      * Delete all cache entries.

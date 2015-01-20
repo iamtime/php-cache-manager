@@ -1,6 +1,6 @@
 <?php
 
-class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
+class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
 {
     /**
      * Memcache instance.
@@ -27,7 +27,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
     public function getCache()
     {
         if (!isset($this->cache)) {
-            $this->cache = new Memcached();
+            $this->cache = new Memcache();
             $this->cache->addServer($this->options['host'], $this->options['port']);
         }
 
@@ -42,9 +42,7 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
      */
     public function has($key)
     {
-        $this->getCache()->get($key);
-
-        return $this->getCache()->getResultCode() !== Memcached::RES_NOTFOUND;
+        return $this->getCache()->get($key) !== false;
     }
 
     /**
@@ -59,7 +57,11 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
     {
         $expires = $expires ? $expires : $this->options['expires'];
 
-        return $this->getCache()->set($key, $value, $expires);
+        if (is_bool($value)) {
+            $this->getCache()->set($key.'#REAL', (int) $value, 0, $expires);
+        }
+
+        return $this->getCache()->set($key, $value, 0, $expires);
     }
 
     /**
@@ -71,7 +73,19 @@ class ChipVN_Cache_Adapter_Memcached extends ChipVN_Cache_Adapter_Abstract
      */
     public function get($key, $default = null)
     {
-        return $this->has($key) ? $this->getCache()->get($key) : $default;
+        if ($this->has($key)) {
+            $value = $this->getCache()->get($key);
+
+            if (($value === '' || $value === '1')
+                && false !== $realValue = $this->getCache()->get($key.'#REAL')
+            ) {
+                return (bool) $realValue;
+            }
+
+            return $value;
+        }
+
+        return $default;
     }
 
     /**
