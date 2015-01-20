@@ -47,7 +47,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
 
         return file_put_contents($file, serialize($value), LOCK_EX) && touch($file, time() + $expires)
             ? true
-            : file_exists($file) && unlink($file) && false;
+            : $this->delete($key) && false;
     }
 
     /**
