@@ -5,33 +5,37 @@ class ChipVN_Cache_Manager
     /**
      * Create new Cache instrance.
      *
-     * @param  string                        $adapter
+     * @param  string                        $name
      * @param  array                         $options
      * @return ChipVN_Cache_Adapter_Abstract
      */
-    public static function make($adapter = 'Session', array $options = array())
+    public static function make($name = 'Session', array $options = array())
     {
-        $prefix = 'ChipVN_Cache_Adapter_';
-        foreach (array($prefix.'Abstract', $class = $prefix.ucfirst($adapter)) as $name) {
-            if (!class_exists($name, false)) {
-                require self::getClassFile($name);
-            }
-        }
+        $class = self::getAdapter($name);
 
         return new $class($options);
     }
 
     /**
-     * Gets class file.
+     * Load all adapters.
      *
-     * @param  string $class
      * @return string
      */
-    protected static function getClassFile($class)
+    protected static function getAdapter($name)
     {
-        return strtr($class, array(
-            'ChipVN' => dirname(dirname(__FILE__)),
-            '_'      => DIRECTORY_SEPARATOR,
-        )).'.php';
+        static $loaded = false;
+        if (!$loaded) {
+            foreach (glob(dirname(__FILE__).'/Adapter/*.php') as $file) {
+                require_once $file;
+            }
+            $loaded = true;
+        }
+
+        $class = 'ChipVN_Cache_Adapter_'.ucfirst(strtolower($name));
+        if (!class_exists($class)) {
+            throw new Exception(sprintf('Class "%s" is not exists.', $class));
+        }
+
+        return $class;
     }
 }
