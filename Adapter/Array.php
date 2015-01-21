@@ -33,6 +33,8 @@ class ChipVN_Cache_Adapter_Array extends ChipVN_Cache_Adapter_Abstract
         $expires = $expires ? $expires : $this->options['expires'];
 
         $this->data[$key] = array(time() + $expires, $value);
+
+        return true;
     }
 
     /**
