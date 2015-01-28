@@ -5,14 +5,14 @@ class ChipVN_Cache_Manager
     /**
      * Create new Cache instrance.
      *
-     * @param  string                        $name
+     * @param  string                        $adapter
      * @param  array                         $options
      * @return ChipVN_Cache_Adapter_Abstract
      */
-    public static function make($name = 'Session', array $options = array())
+    public static function make($adapter = 'Session', array $options = array())
     {
         $prefix = 'ChipVN_Cache_Adapter_';
-        foreach (array($prefix.'Abstract', $class = $prefix.ucfirst($plugin)) as $name) {
+        foreach (array($prefix.'Abstract', $class = $prefix.ucfirst($adapter)) as $name) {
             if (!class_exists($name, false)) {
                 require self::getClassFile($name);
             }
