@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__FILE__).'/Array.php';
+
 /**
  * Note: Life time of cache entries can't longer than session expires
  */
