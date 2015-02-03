@@ -58,11 +58,12 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
      */
     public function has($key)
     {
-        $file = $this->getFile($key);
+        $file   = $this->getFile($key);
+        $exists = file_exists($file);
 
-        return file_exists($file) && filemtime($file) > time()
+        return $exists && filemtime($file) > time()
             ? true
-            : $this->delete($key) && false;
+            : $exists && unlink($file) && false;
     }
 
     /**
