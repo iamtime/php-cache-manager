@@ -15,29 +15,17 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
      * @var array
      */
     protected $options = array(
-        'host' => '127.0.0.1',
-        'port' => 11211,
+        array(
+            'host' => '127.0.0.1',
+            'port' => 11211,
+        ),
     );
-
-    /**
-     * Gets cache instance.
-     *
-     * @return Memcache
-     */
-    public function getCache()
-    {
-        if (!isset($this->cache)) {
-            $this->cache = new Memcache();
-            $this->cache->addServer($this->options['host'], $this->options['port']);
-        }
-
-        return $this->cache;
-    }
 
     /**
      * Determine if the key is exist or not.
      *
-     * @param  string  $key
+     * @param string $key
+     *
      * @return boolean
      */
     public function has($key)
@@ -50,9 +38,10 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
     /**
      * Set a cache entry.
      *
-     * @param  strign       $key
-     * @param  mixed        $value
-     * @param  null|integer $expires In seconds
+     * @param strign       $key
+     * @param mixed        $value
+     * @param null|integer $expires In seconds
+     *
      * @return boolean
      */
     public function set($key, $value, $expires = null)
@@ -70,8 +59,9 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
     /**
      * Get a cache entry.
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * @param string $key
+     * @param mixed  $default
+     *
      * @return mixed
      */
     public function get($key, $default = null)
@@ -95,7 +85,8 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
     /**
      * Delete a cache entry.
      *
-     * @param  string  $name
+     * @param string $name
+     *
      * @return boolean
      */
     public function delete($key)
@@ -117,10 +108,25 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
 
     /**
      * Run garbage collect.
-     *
-     * @return void
      */
     public function garbageCollect()
     {
+    }
+
+    /**
+     * Gets cache instance.
+     *
+     * @return Memcache
+     */
+    protected function getCache()
+    {
+        if (!isset($this->cache)) {
+            $this->cache = new Memcache();
+            foreach ($this->options as $server) {
+                $this->cache->addServer($server['host'], $server['port']);
+            }
+        }
+
+        return $this->cache;
     }
 }
