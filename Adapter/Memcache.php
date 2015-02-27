@@ -15,10 +15,12 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
      * @var array
      */
     protected $options = array(
-        array(
-            'host' => '127.0.0.1',
-            'port' => 11211,
-        ),
+        'servers' => array(
+            array(
+                'host' => '127.0.0.1',
+                'port' => 11211,
+            ),
+        )
     );
 
     /**
@@ -122,7 +124,7 @@ class ChipVN_Cache_Adapter_Memcache extends ChipVN_Cache_Adapter_Abstract
     {
         if (!isset($this->cache)) {
             $this->cache = new Memcache();
-            foreach ($this->options as $server) {
+            foreach ($this->options['servers'] as $server) {
                 $this->cache->addServer($server['host'], $server['port']);
             }
         }
