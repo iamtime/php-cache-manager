@@ -18,7 +18,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     );
 
     /**
-     * Create new cache instance
+     * Create new cache instance.
      *
      * @param array $options
      */
@@ -35,10 +35,11 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     /**
      * Set a cache entry.
      *
-     * @param  strign       $key
-     * @param  mixed        $value
-     * @param  null|integer $expires In seconds
-     * @return boolean
+     * @param strign   $key
+     * @param mixed    $value
+     * @param null|int $expires In seconds
+     *
+     * @return bool
      */
     public function set($key, $value, $expires = null)
     {
@@ -53,12 +54,13 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     /**
      * Determine if the key is exist or not.
      *
-     * @param  string  $key
-     * @return boolean
+     * @param string $key
+     *
+     * @return bool
      */
     public function has($key)
     {
-        $file   = $this->getFile($key);
+        $file = $this->getFile($key);
         $exists = file_exists($file);
 
         return $exists && filemtime($file) > time()
@@ -69,8 +71,9 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     /**
      * Get a cache entry.
      *
-     * @param  string $key
-     * @param  mixed  $default
+     * @param string $key
+     * @param mixed  $default
+     *
      * @return mixed
      */
     public function get($key, $default = null)
@@ -83,8 +86,9 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     /**
      * Delete a cache entry.
      *
-     * @param  string  $name
-     * @return boolean
+     * @param string $name
+     *
+     * @return bool
      */
     public function delete($key)
     {
@@ -94,7 +98,7 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     /**
      * Delete all cache entries.
      *
-     * @return boolean
+     * @return bool
      */
     public function flush()
     {
@@ -114,16 +118,19 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     /**
      * Run garbage collect recusive.
      *
-     * @param  string $directory
+     * @param string $directory
+     *
      * @return void
      */
     protected function runGarbageCollect($directory)
     {
-        foreach (glob($directory.'/*') as $item) {
+        foreach ((array) glob($directory.'/*') as $item) {
             if (is_dir($item)) {
                 $this->runGarbageCollect($item);
                 !glob($item.'/*') && rmdir($item);
-            } elseif (substr($item, -strlen($this->options['extension'])) == $this->options['extension']) {
+            } elseif (is_file($item)
+                && substr($item, -strlen($this->options['extension'])) == $this->options['extension']
+            ) {
                 filemtime($item) < time() && unlink($item);
             }
         }
@@ -132,16 +139,19 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     /**
      * Delete a directory.
      *
-     * @param  string  $directory  Without endwish DIRECTORY_SEPARATOR
-     * @param  boolean $selfDelete
+     * @param string $directory  Without endwish DIRECTORY_SEPARATOR
+     * @param bool   $selfDelete
+     *
      * @return void
      */
     protected function emptyDirectory($directory, $selfDelete = false)
     {
-        foreach (glob($directory.'/*') as $item) {
+        foreach ((array) glob($directory.'/*') as $item) {
             if (is_dir($item)) {
                 $this->emptyDirectory($item, true);
-            } elseif (substr($item, -strlen($this->options['extension'])) == $this->options['extension']) {
+            } elseif (is_file($item)
+                && substr($item, -strlen($this->options['extension'])) == $this->options['extension']
+            ) {
                 unlink($item);
             }
         }
@@ -153,8 +163,9 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     /**
      * Gets file for cache.
      *
-     * @param  string  $key
-     * @param  boolean $preparePath
+     * @param string $key
+     * @param bool   $preparePath
+     *
      * @return string
      */
     protected function getFile($key, $preparePath = false)
@@ -165,13 +176,14 @@ class ChipVN_Cache_Adapter_File extends ChipVN_Cache_Adapter_Abstract
     /**
      * Gets cache path for key.
      *
-     * @param  string  $key
-     * @param  boolean $preparePath
+     * @param string $key
+     * @param bool   $preparePath
+     *
      * @return string
      */
     protected function getPath($key, $preparePath)
     {
-        $tmp  = md5($key);
+        $tmp = md5($key);
         $path = $this->options['cache_dir'].substr($tmp, 0, 2).DIRECTORY_SEPARATOR.substr($tmp, 2, 2).DIRECTORY_SEPARATOR;
 
         if ($preparePath && !is_dir($path)) {
